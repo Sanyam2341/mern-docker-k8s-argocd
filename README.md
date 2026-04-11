@@ -83,12 +83,14 @@ docker-compose down
 
 Images are available on Docker Hub:
 - Backend: `sanyam23411/note-app-backend:v1`
-- Frontend: `sanyam23411/note-app-frontend:v1`
+- Frontend: `sanyam23411/note-app-frontend:v1` / `sanyam23411/note-app-frontend:v2`
+
+> **Note:** Docker Desktop (or an alternative like Colima/Podman) must be running for any `docker` command (build, push, pull). You can close it once the push is complete — images are stored on Docker Hub.
 
 ### Pull images
 ```bash
 docker pull sanyam23411/note-app-backend:v1
-docker pull sanyam23411/note-app-frontend:v1
+docker pull sanyam23411/note-app-frontend:v2
 ```
 
 ## ☁️ AWS EC2 Deployment
@@ -156,10 +158,15 @@ docker build -t note-app-frontend ./frontend
 
 ### Build multi-platform images
 
+> `docker buildx` uses BuildKit to build for multiple architectures. `--push` pushes directly to Docker Hub since multi-arch images can't be stored locally. Docker Desktop must be running for this.
+
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t YOUR_USERNAME/note-app-backend:v1 --push ./backend
-docker buildx build --platform linux/amd64,linux/arm64 -t YOUR_USERNAME/note-app-frontend:v1 --push ./frontend
+docker buildx create --use --name mybuilder   # one-time setup
+docker buildx build --platform linux/amd64,linux/arm64 -t sanyam23411/note-app-backend:v1 --push ./backend
+docker buildx build --platform linux/amd64,linux/arm64 -t sanyam23411/note-app-frontend:v2 --push ./frontend
 ```
+
+> After pushing, you can close Docker Desktop — images live on Docker Hub and can be pulled from anywhere.
 
 ## 🔜 Roadmap
 

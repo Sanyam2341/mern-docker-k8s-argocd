@@ -5,13 +5,16 @@ function Notes() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+  // Use current hostname with port 5000
+  const API_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
+
   useEffect(() => {
     fetchNotes();
   }, []);
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch('http://localhost:5000/notes');
+      const response = await fetch(`${API_URL}/notes`);
       const data = await response.json();
       setNotes(data);
     } catch (error) {
@@ -23,7 +26,7 @@ function Notes() {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/notes', {
+      const response = await fetch(`${API_URL}/notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +45,7 @@ function Notes() {
 
   const deleteNote = async (id) => {
     try {
-      await fetch(`http://localhost:5000/notes/${id}`, {
+      await fetch(`${API_URL}/notes/${id}`, {
         method: 'DELETE',
       });
       

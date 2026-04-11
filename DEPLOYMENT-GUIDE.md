@@ -152,6 +152,8 @@ docker-compose down
 
 ### Step 2.2: Login to Docker Hub
 
+> Docker Desktop (or Colima/Podman) must be running for any `docker` command — it provides the daemon that the CLI talks to via the docker.sock socket.
+
 **Command:**
 ```bash
 docker login
@@ -193,12 +195,16 @@ docker push sanyam23411/note-app-frontend:v1
 
 **Solution:**
 ```bash
+docker buildx create --use --name mybuilder   # one-time: create multi-platform builder
 docker buildx build --platform linux/amd64,linux/arm64 -t sanyam23411/note-app-backend:v1 --push ./backend
-
-docker buildx build --platform linux/amd64,linux/arm64 -t sanyam23411/note-app-frontend:v1 --push ./frontend
+docker buildx build --platform linux/amd64,linux/arm64 -t sanyam23411/note-app-frontend:v2 --push ./frontend
 ```
 
-**Why:** Creates images that work on both architectures
+**What `--push` does:** Multi-arch images can't be stored locally, so `--push` sends them directly to Docker Hub.
+
+**Why:** Creates images that work on both architectures.
+
+> Once pushed, you can close Docker Desktop — images are stored on Docker Hub and can be pulled from any machine independently.
 
 ---
 
@@ -273,7 +279,7 @@ docker-compose --version
 **Commands:**
 ```bash
 docker pull sanyam23411/note-app-backend:v1
-docker pull sanyam23411/note-app-frontend:v1
+docker pull sanyam23411/note-app-frontend:v2
 ```
 
 ---
@@ -294,7 +300,7 @@ services:
       - "5000:5000"
   
   frontend:
-    image: sanyam23411/note-app-frontend:v1
+    image: sanyam23411/note-app-frontend:v2
     ports:
       - "3000:3000"
     depends_on:

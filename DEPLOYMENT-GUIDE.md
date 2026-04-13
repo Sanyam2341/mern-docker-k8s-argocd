@@ -14,6 +14,7 @@ Step-by-step guides for everything we've done, organized by topic.
 | 4 | [gimme-aws-creds](./docs/04-gimme-aws-creds.md) | Okta SSO setup, fetch temporary AWS credentials |
 | 5 | [Amazon ECR](./docs/05-docker-ecr.md) | Create ECR repos, push/pull images, IAM roles |
 | 6 | [PostgreSQL](./docs/06-postgresql.md) | Add PostgreSQL locally & with Docker Compose |
+| 7 | [AWS RDS](./docs/07-aws-rds.md) | Managed PostgreSQL, SSL, connect from EC2 |
 
 ---
 
@@ -44,11 +45,11 @@ gimme-aws-creds
 export AWS_PROFILE="watch-audiotools-nonprod-/DEVADMIN"
 
 # ECR login
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 598917779747.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
 
 # Push to ECR
-docker tag <image> 598917779747.dkr.ecr.us-east-1.amazonaws.com/<repo>:<tag>
-docker push 598917779747.dkr.ecr.us-east-1.amazonaws.com/<repo>:<tag>
+docker tag <image> <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/<repo>:<tag>
+docker push <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/<repo>:<tag>
 
 # Run on EC2
 docker compose up -d
@@ -58,9 +59,9 @@ docker compose up -d
 
 ## Upcoming
 
-- [ ] Push updated images to ECR
-- [ ] Run on EC2 with PostgreSQL container
-- [ ] Switch to AWS RDS (managed PostgreSQL)
+- [x] Push updated images to ECR
+- [x] Run on EC2 with PostgreSQL container
+- [x] Switch to AWS RDS (managed PostgreSQL)
 - [ ] Kubernetes (EKS) + RDS
 - [ ] Argo CD — GitOps workflow
 - [ ] CI/CD pipeline

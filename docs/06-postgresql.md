@@ -118,7 +118,7 @@ services:
     environment:
       DB_HOST: postgres
       DB_USER: root
-      DB_PASSWORD: root123
+      DB_PASSWORD: <your-db-password>
       DB_NAME: notesdb
       DB_PORT: 5432
 
@@ -128,7 +128,7 @@ services:
       - '5432:5432'
     environment:
       POSTGRES_USER: root
-      POSTGRES_PASSWORD: root123
+      POSTGRES_PASSWORD: <your-db-password>
       POSTGRES_DB: notesdb
     volumes:
       - pgdata:/var/lib/postgresql/data

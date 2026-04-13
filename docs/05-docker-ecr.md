@@ -59,7 +59,7 @@ aws ecr create-repository --repository-name note-app-backend --region us-east-1
 ## Step 2: Authenticate Docker to ECR
 
 ```bash
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 598917779747.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
 ```
 
 - `aws ecr get-login-password` → generates a temporary Docker password using your AWS creds
@@ -71,31 +71,48 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 
 ---
 
-## Step 3: Tag Images for ECR
+## Step 3: Tag & Push to ECR
 
-Format: `<account>.dkr.ecr.<region>.amazonaws.com/<repo-name>:<tag>`
+There are **two ways** to push images to ECR:
+
+### Way 1: Tag & Push (single architecture)
+
+Pushes the image that's already built locally. Only works for your machine's architecture.
 
 ```bash
-docker tag sanyam23411/note-app-backend:v1 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
+# Tag
+docker tag <local-image> <ecr-url>/<repo>:<tag>
 
-docker tag sanyam23411/note-app-frontend:v1 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v1
+# Push
+docker push <ecr-url>/<repo>:<tag>
+```
 
-docker tag sanyam23411/note-app-frontend:v2 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
+Example:
+```bash
+docker tag sanyam23411/note-app-backend:v1 <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
+docker push <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
 ```
 
 > ⚠️ Use image names (not IDs) to avoid tagging the wrong image!
+> ⚠️ If built on Mac (ARM), may not run on EC2 (AMD64).
 
----
+### Way 2: Buildx Build & Push (multi-architecture) ✅ Recommended
 
-## Step 4: Push to ECR
+Builds for both ARM + AMD64 and pushes directly to ECR in one command.
 
 ```bash
-docker push 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
-
-docker push 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v1
-
-docker push 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
+docker buildx build --platform linux/amd64,linux/arm64 -t <ecr-url>/<repo>:<tag> --push ./<service-folder>
 ```
+
+Example:
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v2 --push ./backend
+docker buildx build --platform linux/amd64,linux/arm64 -t <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2 --push ./frontend
+```
+
+**When to use which?**
+- Way 1 → quick push, same architecture, testing
+- Way 2 → production, multi-arch, works everywhere
 
 > Tagging and pushing can ONLY be done via CLI — not from the AWS Console UI.
 
@@ -120,7 +137,7 @@ No manual credentials needed on EC2.
 ### Option B: Login manually on EC2
 
 ```bash
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 598917779747.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
 ```
 
 ### Why is docker login still needed with an IAM role?
@@ -132,37 +149,73 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 ### Pull the images:
 
 ```bash
-docker pull 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
-docker pull 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v1
-docker pull 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
+docker pull <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v2
+docker pull <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
 ```
 
 ---
 
-## Step 6: Run Containers from ECR Images
+## Step 6: Run on EC2 with docker-compose.yml
 
-```bash
-docker run -d -p 5000:5000 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
-docker run -d -p 3000:3000 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
-```
-
-Or update `docker-compose.yml` to use ECR images:
+Update `docker-compose.yml` on EC2 to use ECR images + PostgreSQL:
 
 ```yaml
 services:
-  backend:
-    image: 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1
+  postgres:
+    image: postgres:16-alpine
     ports:
-      - "5000:5000"
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: <your-db-password>
+      POSTGRES_DB: notesdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d notesdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v2
+    ports:
+      - '5000:5000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_USER: root
+      DB_PASSWORD: <your-db-password>
+      DB_NAME: notesdb
+      DB_PORT: 5432
 
   frontend:
-    image: 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
+    image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v2
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       - backend
+
+volumes:
+  pgdata:
 ```
+
+**Key differences from local docker-compose.yml:**
+- `image:` instead of `build:` (no source code on EC2)
+- Images point to ECR URLs
+- Postgres image is pulled directly from Docker Hub (official, no ECR needed)
 
 ```bash
 docker compose up -d
+docker compose logs backend    # should see "Notes table ready"
 ```
+
+### ECR Images Summary
+
+| Image | Tag | Description |
+|---|---|---|
+| note-app-backend | v1 | Without PostgreSQL |
+| note-app-backend | v2 | With PostgreSQL |
+| note-app-frontend | v1, v2 | Frontend (no DB changes) |

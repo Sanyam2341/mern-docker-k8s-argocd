@@ -108,8 +108,8 @@ Expected output:
 ```json
 {
     "UserId": "AROAXXXXXXX:your.email@nielsen.com",
-    "Account": "598917779747",
-    "Arn": "arn:aws:sts::598917779747:assumed-role/DEVADMIN/your.email@nielsen.com"
+    "Account": "<AWS_ACCOUNT_ID>",
+    "Arn": "arn:aws:sts::<AWS_ACCOUNT_ID>:assumed-role/DEVADMIN/your.email@nielsen.com"
 }
 ```
 

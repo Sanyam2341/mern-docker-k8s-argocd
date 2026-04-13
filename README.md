@@ -23,8 +23,8 @@ docker-compose up -d
 |-------|----------|
 | `sanyam23411/note-app-backend:v1` | Docker Hub |
 | `sanyam23411/note-app-frontend:v1` / `v2` | Docker Hub |
-| `598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1` | Amazon ECR |
-| `598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v1` / `v2` | Amazon ECR |
+| `<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v1` / `v2` / `v3` | Amazon ECR |
+| `<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/note-app-frontend:v1` / `v2` | Amazon ECR |
 
 ## 📚 Documentation
 
@@ -38,6 +38,7 @@ All guides are in the [`docs/`](./docs/) folder:
 | [04 - gimme-aws-creds](./docs/04-gimme-aws-creds.md) | Okta SSO, temporary AWS credentials |
 | [05 - Amazon ECR](./docs/05-docker-ecr.md) | ECR repos, push/pull, IAM roles |
 | [06 - PostgreSQL](./docs/06-postgresql.md) | Add PostgreSQL locally & with Docker Compose |
+| [07 - AWS RDS](./docs/07-aws-rds.md) | Managed PostgreSQL, SSL, connect from EC2 |
 
 See [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) for the full overview.
 
@@ -59,7 +60,8 @@ note-app/
 │   ├── 03-docker-on-ec2.md
 │   ├── 04-gimme-aws-creds.md
 │   ├── 05-docker-ecr.md
-│   └── 06-postgresql.md
+│   ├── 06-postgresql.md
+│   └── 07-aws-rds.md
 ├── docker-compose.yml
 ├── DEPLOYMENT-GUIDE.md
 └── README.md
@@ -74,10 +76,10 @@ note-app/
 - [x] AWS EC2 deployment
 - [x] Amazon ECR integration
 - [x] PostgreSQL integration
-- [ ] Push updated images to ECR
-- [ ] Run on EC2 with PostgreSQL
-- [ ] AWS RDS (managed PostgreSQL)
-- [ ] Kubernetes (EKS) + RDS
+- [x] Push updated images to ECR
+- [x] Run on EC2 with PostgreSQL
+- [x] AWS RDS (managed PostgreSQL)
+- [ ] Kubernetes (EKS) — StatefulSet + RDS
 - [ ] Argo CD — GitOps
 - [ ] CI/CD pipeline
 

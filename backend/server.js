@@ -1,6 +1,7 @@
 // Import required libraries
 const express = require('express');
 const cors = require('cors');
+const { Pool } = require('pg');
 
 // Create Express app
 const app = express();
@@ -9,9 +10,25 @@ const app = express();
 app.use(cors()); // Allow frontend to connect
 app.use(express.json()); // Parse JSON from requests
 
-// In-memory storage (temporary - resets when server restarts)
-let notes = [];
-let nextId = 1;
+// PostgreSQL connection
+const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || process.env.USER,
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'notesdb',
+  port: process.env.DB_PORT || 5432,
+});
+
+// Create notes table on startup
+pool.query(`
+  CREATE TABLE IF NOT EXISTS notes (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    content TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+  )
+`).then(() => console.log('Notes table ready'))
+  .catch(err => console.error('DB error:', err));
 
 // REST API Routes (endpoints)
 
@@ -29,27 +46,24 @@ app.get('/', (req, res) => {
 });
 
 // GET /notes - Get all notes
-app.get('/notes', (req, res) => {
-  res.json(notes);
+app.get('/notes', async (req, res) => {
+  const result = await pool.query('SELECT * FROM notes ORDER BY id DESC');
+  res.json(result.rows);
 });
 
 // POST /notes - Create a new note
-app.post('/notes', (req, res) => {
+app.post('/notes', async (req, res) => {
   const { title, content } = req.body;
-  const newNote = {
-    id: nextId++,
-    title,
-    content,
-    createdAt: new Date()
-  };
-  notes.push(newNote);
-  res.status(201).json(newNote);
+  const result = await pool.query(
+    'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING *',
+    [title, content]
+  );
+  res.status(201).json(result.rows[0]);
 });
 
 // DELETE /notes/:id - Delete a note by ID
-app.delete('/notes/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  notes = notes.filter(note => note.id !== id);
+app.delete('/notes/:id', async (req, res) => {
+  await pool.query('DELETE FROM notes WHERE id = $1', [parseInt(req.params.id)]);
   res.status(204).send();
 });
 

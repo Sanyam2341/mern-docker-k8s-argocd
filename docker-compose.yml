@@ -12,3 +12,34 @@ services:
     build: ./backend 
     ports: 
       - '5000:5000'
+    depends_on: 
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_USER: root
+      DB_PASSWORD: root123
+      DB_NAME: notesdb
+      DB_PORT: 5432
+
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root123
+      POSTGRES_DB: notesdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d notesdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    
+
+volumes:
+  pgdata:

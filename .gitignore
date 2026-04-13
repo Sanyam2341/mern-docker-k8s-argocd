@@ -29,4 +29,6 @@ Thumbs.db
 *.swo
 
 # Docker
-.dockerignore
+# .dockerignore
+
+delete.txt

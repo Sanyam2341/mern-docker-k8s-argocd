@@ -31,4 +31,7 @@ Thumbs.db
 # Docker
 # .dockerignore
 
+# Kubernetes secrets
+k8s/secret.yml
+
 delete.txt

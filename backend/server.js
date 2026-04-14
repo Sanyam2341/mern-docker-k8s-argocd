@@ -38,22 +38,22 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Note Taking API',
     endpoints: {
-      'GET /notes': 'Get all notes',
-      'POST /notes': 'Create a note',
-      'DELETE /notes/:id': 'Delete a note',
-      'GET /health': 'Health check'
+      'GET /api/notes': 'Get all notes',
+      'POST /api/notes': 'Create a note',
+      'DELETE /api/notes/:id': 'Delete a note',
+      'GET /api/health': 'Health check'
     }
   });
 });
 
-// GET /notes - Get all notes
-app.get('/notes', async (req, res) => {
+// GET /api/notes - Get all notes
+app.get('/api/notes', async (req, res) => {
   const result = await pool.query('SELECT * FROM notes ORDER BY id DESC');
   res.json(result.rows);
 });
 
-// POST /notes - Create a new note
-app.post('/notes', async (req, res) => {
+// POST /api/notes - Create a new note
+app.post('/api/notes', async (req, res) => {
   const { title, content } = req.body;
   const result = await pool.query(
     'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING *',
@@ -62,14 +62,14 @@ app.post('/notes', async (req, res) => {
   res.status(201).json(result.rows[0]);
 });
 
-// DELETE /notes/:id - Delete a note by ID
-app.delete('/notes/:id', async (req, res) => {
+// DELETE /api/notes/:id - Delete a note by ID
+app.delete('/api/notes/:id', async (req, res) => {
   await pool.query('DELETE FROM notes WHERE id = $1', [parseInt(req.params.id)]);
   res.status(204).send();
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 

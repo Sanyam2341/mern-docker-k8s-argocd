@@ -5,8 +5,7 @@ function Notes() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  // Use current hostname with port 5000
-  const API_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
+  const API_URL = `/api`;
 
   useEffect(() => {
     fetchNotes();

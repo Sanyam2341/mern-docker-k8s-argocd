@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v2
+        image: 598917779747.dkr.ecr.us-east-1.amazonaws.com/note-app-backend:v3
         resources:
           requests:
             cpu: "100m"
@@ -26,13 +26,13 @@ spec:
             memory: "256Mi"
         readinessProbe:
           httpGet:
-            path: /health
+            path: /api/health
             port: 5000
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
-            path: /health
+            path: /api/health
             port: 5000
           initialDelaySeconds: 10
           periodSeconds: 15

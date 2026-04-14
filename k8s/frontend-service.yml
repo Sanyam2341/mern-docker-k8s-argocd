@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: note-app
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
       app: frontend
   ports:

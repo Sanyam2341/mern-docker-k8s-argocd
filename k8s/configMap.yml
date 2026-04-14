@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: note-app
+data:
+  DB_HOST: "postgres"  
+  DB_NAME: "notesdb"
+  DB_PORT: "5432"

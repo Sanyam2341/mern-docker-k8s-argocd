@@ -1,0 +1,57 @@
+# Argo CD Helm Values — Production Ready
+# Install: helm install argocd argo/argo-cd -n argocd -f values.yaml
+# Upgrade: helm upgrade argocd argo/argo-cd -n argocd -f values.yaml
+
+server:
+  # 2 replicas for high availability — if one pod dies, the other serves
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+controller:
+  # The brain — compares Git vs cluster
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+repoServer:
+  # Clones Git repos and reads manifests
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+redis:
+  # Cache layer
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+dex:
+  # SSO server — disable if not using SSO
+  enabled: false
+
+notifications:
+  # Slack/email alerts — disable if not using
+  enabled: false
+
+applicationSet:
+  # Multi-app generator — disable if not using
+  enabled: false

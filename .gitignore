@@ -33,5 +33,6 @@ Thumbs.db
 
 # Kubernetes secrets
 k8s/secret.yml
+k8s/argocd/repository-secret.yml
 
 delete.txt
